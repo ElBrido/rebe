@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music - <%= guild.guildName %></title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+    <%- include('../partials/header') %>
+    
+    <div class="dashboard-container">
+        <aside class="dashboard-sidebar">
+            <h2><%= guild.guildName %></h2>
+            <nav class="dashboard-nav">
+                <a href="/dashboard/<%= guild.guildId %>">Overview</a>
+                <a href="/dashboard/<%= guild.guildId %>/moderation">🛡️ Moderation</a>
+                <a href="/dashboard/<%= guild.guildId %>/antiraid">🔒 Anti-Raid</a>
+                <a href="/dashboard/<%= guild.guildId %>/welcome">👋 Welcome/Goodbye</a>
+                <a href="/dashboard/<%= guild.guildId %>/autoroles">🎭 Auto Roles</a>
+                <a href="/dashboard/<%= guild.guildId %>/leveling">📊 Leveling</a>
+                <a href="/dashboard/<%= guild.guildId %>/music" class="active">🎵 Music</a>
+                <a href="/dashboard/<%= guild.guildId %>/tickets">🎫 Tickets</a>
+                <a href="/dashboard/<%= guild.guildId %>/custom-commands">⚙️ Custom Commands</a>
+                <% if (guild.premium.enabled) { %>
+                    <a href="/dashboard/<%= guild.guildId %>/premium" class="premium-link">⭐ Premium</a>
+                <% } %>
+            </nav>
+        </aside>
+        
+        <main class="dashboard-main">
+            <div class="dashboard-header">
+                <h1>🎵 Music Settings</h1>
+            </div>
+            
+            <form class="settings-form" id="musicForm">
+                <div class="form-section">
+                    <h3>General Settings</h3>
+                    
+                    <div class="form-group">
+                        <label class="toggle-label">
+                            <input type="checkbox" name="music.enabled" <%= guild.music.enabled ? 'checked' : '' %>>
+                            <span class="toggle-slider"></span>
+                            Enable Music Module
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="djRole">DJ Role ID</label>
+                        <input type="text" id="djRole" name="music.djRole" 
+                               value="<%= guild.music.djRole || '' %>" 
+                               placeholder="Enter role ID (optional)">
+                        <small>Members with this role can control the music player</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="maxQueueSize">Maximum Queue Size</label>
+                        <input type="number" id="maxQueueSize" name="music.maxQueueSize" 
+                               value="<%= guild.music.maxQueueSize %>" min="10" max="1000">
+                        <small>Maximum number of songs in the queue (default: 100)</small>
+                    </div>
+                </div>
+                
+                <div class="info-section">
+                    <h3>Available Commands</h3>
+                    <ul>
+                        <li><code>/play [song]</code> - Play a song from YouTube or Spotify</li>
+                        <li><code>/pause</code> - Pause the current song</li>
+                        <li><code>/resume</code> - Resume playback</li>
+                        <li><code>/skip</code> - Skip to the next song</li>
+                        <li><code>/queue</code> - View the current queue</li>
+                        <li><code>/nowplaying</code> - Show current song</li>
+                        <li><code>/volume [1-100]</code> - Adjust volume</li>
+                        <li><code>/stop</code> - Stop playback and clear queue</li>
+                    </ul>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="reset" class="btn btn-secondary">Reset</button>
+                </div>
+            </form>
+        </main>
+    </div>
+    
+    <%- include('../partials/footer') %>
+    
+    <script>
+        document.getElementById('musicForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = {};
+            
+            // Process form data
+            for (let [key, value] of formData.entries()) {
+                if (key.includes('.')) {
+                    const keys = key.split('.');
+                    let obj = data;
+                    for (let i = 0; i < keys.length - 1; i++) {
+                        if (!obj[keys[i]]) obj[keys[i]] = {};
+                        obj = obj[keys[i]];
+                    }
+                    
+                    // Convert numbers
+                    if (key.includes('maxQueueSize')) {
+                        obj[keys[keys.length - 1]] = parseInt(value);
+                    } else {
+                        obj[keys[keys.length - 1]] = value;
+                    }
+                } else {
+                    data[key] = value;
+                }
+            }
+            
+            // Handle checkboxes
+            const checkboxes = e.target.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                const keys = cb.name.split('.');
+                let obj = data;
+                for (let i = 0; i < keys.length - 1; i++) {
+                    if (!obj[keys[i]]) obj[keys[i]] = {};
+                    obj = obj[keys[i]];
+                }
+                obj[keys[keys.length - 1]] = cb.checked;
+            });
+            
+            try {
+                const response = await fetch(`/api/guild/<%= guild.guildId %>`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    alert('Settings saved successfully!');
+                    location.reload();
+                } else {
+                    alert('Failed to save settings. Please try again.');
+                }
+            } catch (error) {
+                alert('An error occurred. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>

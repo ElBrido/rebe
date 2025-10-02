@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anti-Raid - <%= guild.guildName %></title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+    <%- include('../partials/header') %>
+    
+    <div class="dashboard-container">
+        <aside class="dashboard-sidebar">
+            <h2><%= guild.guildName %></h2>
+            <nav class="dashboard-nav">
+                <a href="/dashboard/<%= guild.guildId %>">Overview</a>
+                <a href="/dashboard/<%= guild.guildId %>/moderation">🛡️ Moderation</a>
+                <a href="/dashboard/<%= guild.guildId %>/antiraid" class="active">🔒 Anti-Raid</a>
+                <a href="/dashboard/<%= guild.guildId %>/welcome">👋 Welcome/Goodbye</a>
+                <a href="/dashboard/<%= guild.guildId %>/autoroles">🎭 Auto Roles</a>
+                <a href="/dashboard/<%= guild.guildId %>/leveling">📊 Leveling</a>
+                <a href="/dashboard/<%= guild.guildId %>/music">🎵 Music</a>
+                <a href="/dashboard/<%= guild.guildId %>/tickets">🎫 Tickets</a>
+                <a href="/dashboard/<%= guild.guildId %>/custom-commands">⚙️ Custom Commands</a>
+                <% if (guild.premium.enabled) { %>
+                    <a href="/dashboard/<%= guild.guildId %>/premium" class="premium-link">⭐ Premium</a>
+                <% } %>
+            </nav>
+        </aside>
+        
+        <main class="dashboard-main">
+            <div class="dashboard-header">
+                <h1>🔒 Anti-Raid Protection</h1>
+                <% if (guild.antiRaid.raidMode) { %>
+                    <span class="badge badge-error">RAID MODE ACTIVE</span>
+                <% } %>
+            </div>
+            
+            <form class="settings-form" id="antiRaidForm">
+                <div class="form-section">
+                    <h3>General Settings</h3>
+                    
+                    <div class="form-group">
+                        <label class="toggle-label">
+                            <input type="checkbox" name="antiRaid.enabled" <%= guild.antiRaid.enabled ? 'checked' : '' %>>
+                            <span class="toggle-slider"></span>
+                            Enable Anti-Raid Protection
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="joinRateLimit">Join Rate Limit</label>
+                        <input type="number" id="joinRateLimit" name="antiRaid.joinRateLimit" 
+                               value="<%= guild.antiRaid.joinRateLimit %>" min="1" max="50">
+                        <small>Maximum members allowed to join per minute (default: 5)</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="accountAgeMin">Minimum Account Age (days)</label>
+                        <input type="number" id="accountAgeMin" name="antiRaid.accountAgeMin" 
+                               value="<%= guild.antiRaid.accountAgeMin %>" min="0" max="365">
+                        <small>Minimum account age required to join (default: 7 days)</small>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Verification System</h3>
+                    
+                    <div class="form-group">
+                        <label for="verificationChannel">Verification Channel ID</label>
+                        <input type="text" id="verificationChannel" name="antiRaid.verificationChannel" 
+                               value="<%= guild.antiRaid.verificationChannel || '' %>" 
+                               placeholder="Enter channel ID">
+                        <small>Channel where new members verify themselves</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="verificationRole">Verified Role ID</label>
+                        <input type="text" id="verificationRole" name="antiRaid.verificationRole" 
+                               value="<%= guild.antiRaid.verificationRole || '' %>" 
+                               placeholder="Enter role ID">
+                        <small>Role given to verified members</small>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Lockdown Settings</h3>
+                    
+                    <div class="form-group">
+                        <label for="lockdownRoles">Lockdown Roles (comma-separated IDs)</label>
+                        <textarea id="lockdownRoles" name="antiRaid.lockdownRoles" rows="3" 
+                                  placeholder="role_id_1, role_id_2, role_id_3"><%= guild.antiRaid.lockdownRoles.join(', ') %></textarea>
+                        <small>Roles that can bypass lockdown restrictions</small>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="reset" class="btn btn-secondary">Reset</button>
+                </div>
+            </form>
+        </main>
+    </div>
+    
+    <%- include('../partials/footer') %>
+    
+    <script>
+        document.getElementById('antiRaidForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = {};
+            
+            // Process form data
+            for (let [key, value] of formData.entries()) {
+                if (key.includes('.')) {
+                    const keys = key.split('.');
+                    let obj = data;
+                    for (let i = 0; i < keys.length - 1; i++) {
+                        if (!obj[keys[i]]) obj[keys[i]] = {};
+                        obj = obj[keys[i]];
+                    }
+                    
+                    // Convert numbers
+                    if (key.includes('joinRateLimit') || key.includes('accountAgeMin')) {
+                        obj[keys[keys.length - 1]] = parseInt(value);
+                    } else {
+                        obj[keys[keys.length - 1]] = value;
+                    }
+                } else {
+                    data[key] = value;
+                }
+            }
+            
+            // Handle checkboxes
+            const checkboxes = e.target.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                const keys = cb.name.split('.');
+                let obj = data;
+                for (let i = 0; i < keys.length - 1; i++) {
+                    if (!obj[keys[i]]) obj[keys[i]] = {};
+                    obj = obj[keys[i]];
+                }
+                obj[keys[keys.length - 1]] = cb.checked;
+            });
+            
+            // Handle lockdown roles array
+            if (data.antiRaid?.lockdownRoles) {
+                data.antiRaid.lockdownRoles = data.antiRaid.lockdownRoles
+                    .split(',')
+                    .map(r => r.trim())
+                    .filter(r => r.length > 0);
+            }
+            
+            try {
+                const response = await fetch(`/api/guild/<%= guild.guildId %>`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    alert('Settings saved successfully!');
+                    location.reload();
+                } else {
+                    alert('Failed to save settings. Please try again.');
+                }
+            } catch (error) {
+                alert('An error occurred. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>

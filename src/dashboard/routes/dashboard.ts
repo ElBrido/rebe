@@ -98,4 +98,29 @@ router.get('/:guildId/welcome', isAuthenticated, async (req, res) => {
   res.render('dashboard/welcome', { user: req.user, guild: guildData });
 });
 
+router.get('/:guildId/autoroles', isAuthenticated, async (req, res) => {
+  const guildData = await Guild.findOne({ guildId: req.params.guildId });
+  res.render('dashboard/autoroles', { user: req.user, guild: guildData });
+});
+
+router.get('/:guildId/leveling', isAuthenticated, async (req, res) => {
+  const guildData = await Guild.findOne({ guildId: req.params.guildId });
+  res.render('dashboard/leveling', { user: req.user, guild: guildData });
+});
+
+router.get('/:guildId/music', isAuthenticated, async (req, res) => {
+  const guildData = await Guild.findOne({ guildId: req.params.guildId });
+  res.render('dashboard/music', { user: req.user, guild: guildData });
+});
+
+router.get('/:guildId/tickets', isAuthenticated, async (req, res) => {
+  const guildData = await Guild.findOne({ guildId: req.params.guildId });
+  res.render('dashboard/tickets', { user: req.user, guild: guildData });
+});
+
+router.get('/:guildId/custom-commands', isAuthenticated, async (req, res) => {
+  const guildData = await Guild.findOne({ guildId: req.params.guildId });
+  res.render('dashboard/custom-commands', { user: req.user, guild: guildData });
+});
+
 export default router;

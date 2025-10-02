@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guild Management - Developer Panel</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+    <%- include('../partials/header') %>
+    
+    <div class="dashboard-container">
+        <aside class="dashboard-sidebar">
+            <h2>🔧 Developer Panel</h2>
+            <nav class="dashboard-nav">
+                <a href="/dev">📊 Overview</a>
+                <a href="/dev/guilds" class="active">🏰 Guilds</a>
+            </nav>
+        </aside>
+        
+        <main class="dashboard-main">
+            <div class="dashboard-header">
+                <h1>🏰 Guild Management</h1>
+                <span class="badge">Page <%= pagination.page %> of <%= pagination.pages %></span>
+            </div>
+            
+            <div class="form-section">
+                <table class="dev-table">
+                    <thead>
+                        <tr>
+                            <th>Guild Name</th>
+                            <th>Guild ID</th>
+                            <th>Commands</th>
+                            <th>Members</th>
+                            <th>Premium</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% guilds.forEach(guild => { %>
+                            <tr>
+                                <td><strong><%= guild.guildName %></strong></td>
+                                <td><code><%= guild.guildId %></code></td>
+                                <td><%= guild.stats.commandsUsed %></td>
+                                <td>-</td>
+                                <td>
+                                    <% if (guild.premium.enabled) { %>
+                                        <span class="badge badge-premium">Tier <%= guild.premium.tier %></span>
+                                    <% } else { %>
+                                        <span class="badge">Free</span>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <button onclick="viewGuild('<%= guild.guildId %>')" class="btn btn-sm">View</button>
+                                    <% if (!guild.premium.enabled) { %>
+                                        <button onclick="grantPremium('<%= guild.guildId %>', '<%= guild.guildName %>')" class="btn btn-sm btn-primary">Grant Premium</button>
+                                    <% } else { %>
+                                        <button onclick="revokePremium('<%= guild.guildId %>')" class="btn btn-sm btn-danger">Revoke</button>
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="pagination">
+                <% if (pagination.page > 1) { %>
+                    <a href="/dev/guilds?page=<%= pagination.page - 1 %>" class="btn btn-secondary">Previous</a>
+                <% } %>
+                <span>Page <%= pagination.page %> of <%= pagination.pages %></span>
+                <% if (pagination.page < pagination.pages) { %>
+                    <a href="/dev/guilds?page=<%= pagination.page + 1 %>" class="btn btn-secondary">Next</a>
+                <% } %>
+            </div>
+        </main>
+    </div>
+    
+    <%- include('../partials/footer') %>
+    
+    <script>
+        function viewGuild(guildId) {
+            window.location.href = `/dashboard/${guildId}`;
+        }
+        
+        async function grantPremium(guildId, guildName) {
+            const tier = prompt('Enter premium tier (1-3):', '1');
+            if (!tier) return;
+            
+            const days = prompt('Enter duration in days:', '30');
+            if (!days) return;
+            
+            try {
+                const response = await fetch('/api/dev/premium/grant', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        guildId,
+                        tier: parseInt(tier),
+                        days: parseInt(days)
+                    })
+                });
+                
+                if (response.ok) {
+                    alert(`Premium granted to ${guildName}!`);
+                    location.reload();
+                } else {
+                    alert('Failed to grant premium.');
+                }
+            } catch (error) {
+                alert('An error occurred.');
+            }
+        }
+        
+        async function revokePremium(guildId) {
+            if (!confirm('Are you sure you want to revoke premium for this guild?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/dev/premium/revoke', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ guildId })
+                });
+                
+                if (response.ok) {
+                    alert('Premium revoked successfully!');
+                    location.reload();
+                } else {
+                    alert('Failed to revoke premium.');
+                }
+            } catch (error) {
+                alert('An error occurred.');
+            }
+        }
+    </script>
+</body>
+</html>
