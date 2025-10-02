@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node dist/index.js",
     "dev": "nodemon --watch src --exec ts-node src/index.ts",
-    "build": "tsc",
+    "build": "tsc && npm run copy-assets",
+    "copy-assets": "mkdir -p dist/dashboard/views dist/dashboard/public && cp -r src/dashboard/views/* dist/dashboard/views/ && cp -r src/dashboard/public/* dist/dashboard/public/",
     "bot": "node dist/bot/index.js",
     "dashboard": "node dist/dashboard/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
