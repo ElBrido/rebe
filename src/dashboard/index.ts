@@ -4,7 +4,7 @@ dotenv.config();
 import express from 'express';
 import session from 'express-session';
 import passport from 'passport';
-const DiscordStrategy = require('passport-discord').Strategy;
+import { Strategy as DiscordStrategy } from 'passport-discord';
 import path from 'path';
 import helmet from 'helmet';
 import cors from 'cors';
