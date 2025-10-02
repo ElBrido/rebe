@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura Bot - Professional Discord Bot</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <%- include('partials/header') %>
+    
+    <main class="hero">
+        <div class="container">
+            <h1>🌟 Aura Bot</h1>
+            <p class="tagline">Professional Multi-Guild Discord Bot with Advanced Features</p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <h3>Advanced Moderation</h3>
+                    <p>Complete moderation suite with auto-mod, warnings, and detailed logging</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Anti-Raid Protection</h3>
+                    <p>Intelligent raid detection with automatic lockdown and verification</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🎵</div>
+                    <h3>Music Player</h3>
+                    <p>High-quality music streaming with queue management and filters</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🎫</div>
+                    <h3>Ticket System</h3>
+                    <p>Professional support ticket system with transcripts</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Leveling & Stats</h3>
+                    <p>Engaging leveling system with leaderboards and rewards</p>
+                </div>
+                
+                <div class="feature-card premium">
+                    <div class="feature-icon">⭐</div>
+                    <h3>Premium Features</h3>
+                    <p>Unlock advanced customization and exclusive features</p>
+                </div>
+            </div>
+            
+            <div class="cta-buttons">
+                <% if (user) { %>
+                    <a href="/dashboard" class="btn btn-primary">Go to Dashboard</a>
+                <% } else { %>
+                    <a href="/auth/discord" class="btn btn-primary">Login with Discord</a>
+                <% } %>
+                <a href="https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=8&scope=bot%20applications.commands" class="btn btn-secondary">Add to Server</a>
+            </div>
+        </div>
+    </main>
+    
+    <section class="stats">
+        <div class="container">
+            <div class="stat-item">
+                <div class="stat-number">50,000+</div>
+                <div class="stat-label">Servers</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">5M+</div>
+                <div class="stat-label">Users</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">100+</div>
+                <div class="stat-label">Commands</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">99.9%</div>
+                <div class="stat-label">Uptime</div>
+            </div>
+        </div>
+    </section>
+    
+    <%- include('partials/footer') %>
+</body>
+</html>

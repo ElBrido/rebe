@@ -1,0 +1,20 @@
+<header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="/">🌟 Aura Bot</a>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/">Home</a></li>
+                <li><a href="/premium">Premium</a></li>
+                <li><a href="https://discord.gg/aura" target="_blank">Support</a></li>
+                <% if (user) { %>
+                    <li><a href="/dashboard">Dashboard</a></li>
+                    <li><a href="/auth/logout" class="btn btn-sm">Logout</a></li>
+                <% } else { %>
+                    <li><a href="/auth/discord" class="btn btn-sm">Login</a></li>
+                <% } %>
+            </ul>
+        </div>
+    </nav>
+</header>
