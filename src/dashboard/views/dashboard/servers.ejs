@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Server - Aura Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+    <%- include('../partials/header') %>
+    
+    <div class="dashboard-container">
+        <main class="dashboard-main">
+            <h1>Select a Server</h1>
+            <p>Choose a server to manage with Aura Bot</p>
+            
+            <div class="servers-grid">
+                <% guilds.forEach(guild => { %>
+                    <a href="/dashboard/<%= guild.id %>" class="server-card">
+                        <% if (guild.icon) { %>
+                            <img src="https://cdn.discordapp.com/icons/<%= guild.id %>/<%= guild.icon %>.png" alt="<%= guild.name %>">
+                        <% } else { %>
+                            <div class="server-icon-placeholder"><%= guild.name.charAt(0) %></div>
+                        <% } %>
+                        <h3><%= guild.name %></h3>
+                        <span class="badge">Manage Server</span>
+                    </a>
+                <% }); %>
+            </div>
+            
+            <% if (guilds.length === 0) { %>
+                <div class="empty-state">
+                    <h3>No servers found</h3>
+                    <p>You don't have permission to manage any servers with Aura Bot.</p>
+                    <a href="https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=8&scope=bot%20applications.commands" class="btn btn-primary">Add Aura to Server</a>
+                </div>
+            <% } %>
+        </main>
+    </div>
+    
+    <%- include('../partials/footer') %>
+</body>
+</html>

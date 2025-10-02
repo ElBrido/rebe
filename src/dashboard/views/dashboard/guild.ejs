@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= guild.guildName %> - Aura Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+    <%- include('../partials/header') %>
+    
+    <div class="dashboard-container">
+        <aside class="dashboard-sidebar">
+            <h2><%= guild.guildName %></h2>
+            <nav class="dashboard-nav">
+                <a href="/dashboard/<%= guild.guildId %>" class="active">Overview</a>
+                <a href="/dashboard/<%= guild.guildId %>/moderation">🛡️ Moderation</a>
+                <a href="/dashboard/<%= guild.guildId %>/antiraid">🔒 Anti-Raid</a>
+                <a href="/dashboard/<%= guild.guildId %>/welcome">👋 Welcome/Goodbye</a>
+                <a href="/dashboard/<%= guild.guildId %>/autoroles">🎭 Auto Roles</a>
+                <a href="/dashboard/<%= guild.guildId %>/leveling">📊 Leveling</a>
+                <a href="/dashboard/<%= guild.guildId %>/music">🎵 Music</a>
+                <a href="/dashboard/<%= guild.guildId %>/tickets">🎫 Tickets</a>
+                <a href="/dashboard/<%= guild.guildId %>/custom-commands">⚙️ Custom Commands</a>
+                <% if (guild.premium.enabled) { %>
+                    <a href="/dashboard/<%= guild.guildId %>/premium" class="premium-link">⭐ Premium</a>
+                <% } %>
+            </nav>
+        </aside>
+        
+        <main class="dashboard-main">
+            <div class="dashboard-header">
+                <h1>Server Overview</h1>
+                <% if (guild.premium.enabled) { %>
+                    <span class="badge badge-premium">Premium Tier <%= guild.premium.tier %></span>
+                <% } %>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Commands Used</h3>
+                    <p class="stat-value"><%= guild.stats.commandsUsed %></p>
+                </div>
+                <div class="stat-card">
+                    <h3>Moderation Actions</h3>
+                    <p class="stat-value"><%= guild.stats.moderationActions %></p>
+                </div>
+                <div class="stat-card">
+                    <h3>Messages Logged</h3>
+                    <p class="stat-value"><%= guild.stats.messagesLogged %></p>
+                </div>
+                <div class="stat-card">
+                    <h3>Prefix</h3>
+                    <p class="stat-value"><%= guild.prefix %></p>
+                </div>
+            </div>
+            
+            <div class="modules-grid">
+                <div class="module-card <%= guild.moderation.enabled ? 'enabled' : 'disabled' %>">
+                    <h3>🛡️ Moderation</h3>
+                    <p>Status: <%= guild.moderation.enabled ? 'Enabled' : 'Disabled' %></p>
+                    <a href="/dashboard/<%= guild.guildId %>/moderation" class="btn btn-sm">Configure</a>
+                </div>
+                
+                <div class="module-card <%= guild.antiRaid.enabled ? 'enabled' : 'disabled' %>">
+                    <h3>🔒 Anti-Raid</h3>
+                    <p>Status: <%= guild.antiRaid.enabled ? 'Enabled' : 'Disabled' %></p>
+                    <a href="/dashboard/<%= guild.guildId %>/antiraid" class="btn btn-sm">Configure</a>
+                </div>
+                
+                <div class="module-card <%= guild.welcome.enabled ? 'enabled' : 'disabled' %>">
+                    <h3>👋 Welcome Messages</h3>
+                    <p>Status: <%= guild.welcome.enabled ? 'Enabled' : 'Disabled' %></p>
+                    <a href="/dashboard/<%= guild.guildId %>/welcome" class="btn btn-sm">Configure</a>
+                </div>
+                
+                <div class="module-card <%= guild.leveling.enabled ? 'enabled' : 'disabled' %>">
+                    <h3>📊 Leveling System</h3>
+                    <p>Status: <%= guild.leveling.enabled ? 'Enabled' : 'Disabled' %></p>
+                    <a href="/dashboard/<%= guild.guildId %>/leveling" class="btn btn-sm">Configure</a>
+                </div>
+            </div>
+            
+            <% if (!guild.premium.enabled) { %>
+                <div class="premium-banner">
+                    <h3>⭐ Unlock Premium Features</h3>
+                    <p>Get advanced customization, priority support, and exclusive features!</p>
+                    <a href="/premium" class="btn btn-primary">View Premium Plans</a>
+                </div>
+            <% } %>
+        </main>
+    </div>
+    
+    <%- include('../partials/footer') %>
+</body>
+</html>

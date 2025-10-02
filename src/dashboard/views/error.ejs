@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - Aura Bot</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <%- include('partials/header') %>
+    
+    <main style="text-align: center; padding: 4rem 0;">
+        <div class="container">
+            <h1 style="font-size: 4rem; color: var(--error);">⚠️ Error</h1>
+            <h2><%= error.message || 'Something went wrong' %></h2>
+            <p style="color: var(--text-secondary); margin: 2rem 0;">Please try again or contact support if the problem persists.</p>
+            <a href="/" class="btn btn-primary">Go Home</a>
+        </div>
+    </main>
+    
+    <%- include('partials/footer') %>
+</body>
+</html>

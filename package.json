@@ -1,0 +1,57 @@
+{
+  "name": "aura-discord-bot",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "nodemon --watch src --exec ts-node src/index.ts",
+    "build": "tsc",
+    "bot": "node dist/bot/index.js",
+    "dashboard": "node dist/dashboard/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "moderation",
+    "dashboard",
+    "premium"
+  ],
+  "author": "",
+  "license": "ISC",
+  "description": "Aura - Professional Multi-Guild Discord Bot with Dashboard and Premium Features",
+  "dependencies": {
+    "@discordjs/builders": "^1.11.3",
+    "@discordjs/rest": "^2.6.0",
+    "@discordjs/voice": "^0.18.0",
+    "axios": "^1.12.2",
+    "bcrypt": "^6.0.0",
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "discord-api-types": "^0.38.26",
+    "discord.js": "^14.22.1",
+    "dotenv": "^17.2.3",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "express-session": "^1.18.2",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.18.3",
+    "passport": "^0.7.0",
+    "passport-discord": "^0.1.4",
+    "stripe": "^19.0.0",
+    "winston": "^3.18.3"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/express-session": "^1.18.2",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^24.6.2",
+    "@types/passport": "^1.0.17",
+    "nodemon": "^3.1.10",
+    "typescript": "^5.9.3"
+  }
+}
