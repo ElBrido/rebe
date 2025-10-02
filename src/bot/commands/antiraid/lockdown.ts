@@ -5,15 +5,15 @@ export default {
   data: new SlashCommandBuilder()
     .setName('lockdown')
     .setDescription('Lock or unlock a channel')
+    .addBooleanOption(option =>
+      option.setName('locked')
+        .setDescription('Lock or unlock the channel')
+        .setRequired(true))
     .addChannelOption(option =>
       option.setName('channel')
         .setDescription('The channel to lock/unlock')
         .addChannelTypes(ChannelType.GuildText)
         .setRequired(false))
-    .addBooleanOption(option =>
-      option.setName('locked')
-        .setDescription('Lock or unlock the channel')
-        .setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels),
 
   async execute(interaction: ChatInputCommandInteraction) {
