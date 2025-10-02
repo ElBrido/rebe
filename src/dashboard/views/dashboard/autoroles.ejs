@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Roles - <%= guild.guildName %></title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+    <%- include('../partials/header') %>
+    
+    <div class="dashboard-container">
+        <aside class="dashboard-sidebar">
+            <h2><%= guild.guildName %></h2>
+            <nav class="dashboard-nav">
+                <a href="/dashboard/<%= guild.guildId %>">Overview</a>
+                <a href="/dashboard/<%= guild.guildId %>/moderation">🛡️ Moderation</a>
+                <a href="/dashboard/<%= guild.guildId %>/antiraid">🔒 Anti-Raid</a>
+                <a href="/dashboard/<%= guild.guildId %>/welcome">👋 Welcome/Goodbye</a>
+                <a href="/dashboard/<%= guild.guildId %>/autoroles" class="active">🎭 Auto Roles</a>
+                <a href="/dashboard/<%= guild.guildId %>/leveling">📊 Leveling</a>
+                <a href="/dashboard/<%= guild.guildId %>/music">🎵 Music</a>
+                <a href="/dashboard/<%= guild.guildId %>/tickets">🎫 Tickets</a>
+                <a href="/dashboard/<%= guild.guildId %>/custom-commands">⚙️ Custom Commands</a>
+                <% if (guild.premium.enabled) { %>
+                    <a href="/dashboard/<%= guild.guildId %>/premium" class="premium-link">⭐ Premium</a>
+                <% } %>
+            </nav>
+        </aside>
+        
+        <main class="dashboard-main">
+            <div class="dashboard-header">
+                <h1>🎭 Auto Roles</h1>
+            </div>
+            
+            <form class="settings-form" id="autoRolesForm">
+                <div class="form-section">
+                    <h3>Auto Roles Configuration</h3>
+                    <p>Automatically assign roles to members when they join the server.</p>
+                    
+                    <div class="form-group">
+                        <label for="autoRoles">Auto-Assign Role IDs (comma-separated)</label>
+                        <textarea id="autoRoles" name="autoRoles" rows="4" 
+                                  placeholder="role_id_1, role_id_2, role_id_3"><%= guild.autoRoles.join(', ') %></textarea>
+                        <small>These roles will be automatically given to new members</small>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Current Auto Roles</h3>
+                    <% if (guild.autoRoles.length > 0) { %>
+                        <ul class="role-list">
+                            <% guild.autoRoles.forEach(roleId => { %>
+                                <li class="role-item">
+                                    <span>Role ID: <%= roleId %></span>
+                                </li>
+                            <% }); %>
+                        </ul>
+                    <% } else { %>
+                        <p class="empty-state-text">No auto roles configured yet.</p>
+                    <% } %>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="reset" class="btn btn-secondary">Reset</button>
+                </div>
+            </form>
+        </main>
+    </div>
+    
+    <%- include('../partials/footer') %>
+    
+    <script>
+        document.getElementById('autoRolesForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = {};
+            
+            // Handle auto roles array
+            const autoRolesValue = formData.get('autoRoles');
+            if (autoRolesValue) {
+                data.autoRoles = autoRolesValue
+                    .split(',')
+                    .map(r => r.trim())
+                    .filter(r => r.length > 0);
+            } else {
+                data.autoRoles = [];
+            }
+            
+            try {
+                const response = await fetch(`/api/guild/<%= guild.guildId %>`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    alert('Settings saved successfully!');
+                    location.reload();
+                } else {
+                    alert('Failed to save settings. Please try again.');
+                }
+            } catch (error) {
+                alert('An error occurred. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>

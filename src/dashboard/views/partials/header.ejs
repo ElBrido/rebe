@@ -10,6 +10,13 @@
                 <li><a href="https://discord.gg/aura" target="_blank">Support</a></li>
                 <% if (user) { %>
                     <li><a href="/dashboard">Dashboard</a></li>
+                    <% 
+                    const developerIds = JSON.parse(process.env.DEVELOPER_IDS || '[]');
+                    const isDev = developerIds.includes(user.id);
+                    %>
+                    <% if (isDev) { %>
+                        <li><a href="/dev" class="btn btn-sm btn-dev">🔧 Dev Panel</a></li>
+                    <% } %>
                     <li><a href="/auth/logout" class="btn btn-sm">Logout</a></li>
                 <% } else { %>
                     <li><a href="/auth/discord" class="btn btn-sm">Login</a></li>

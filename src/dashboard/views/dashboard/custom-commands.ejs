@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Commands - <%= guild.guildName %></title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+    <%- include('../partials/header') %>
+    
+    <div class="dashboard-container">
+        <aside class="dashboard-sidebar">
+            <h2><%= guild.guildName %></h2>
+            <nav class="dashboard-nav">
+                <a href="/dashboard/<%= guild.guildId %>">Overview</a>
+                <a href="/dashboard/<%= guild.guildId %>/moderation">🛡️ Moderation</a>
+                <a href="/dashboard/<%= guild.guildId %>/antiraid">🔒 Anti-Raid</a>
+                <a href="/dashboard/<%= guild.guildId %>/welcome">👋 Welcome/Goodbye</a>
+                <a href="/dashboard/<%= guild.guildId %>/autoroles">🎭 Auto Roles</a>
+                <a href="/dashboard/<%= guild.guildId %>/leveling">📊 Leveling</a>
+                <a href="/dashboard/<%= guild.guildId %>/music">🎵 Music</a>
+                <a href="/dashboard/<%= guild.guildId %>/tickets">🎫 Tickets</a>
+                <a href="/dashboard/<%= guild.guildId %>/custom-commands" class="active">⚙️ Custom Commands</a>
+                <% if (guild.premium.enabled) { %>
+                    <a href="/dashboard/<%= guild.guildId %>/premium" class="premium-link">⭐ Premium</a>
+                <% } %>
+            </nav>
+        </aside>
+        
+        <main class="dashboard-main">
+            <div class="dashboard-header">
+                <h1>⚙️ Custom Commands</h1>
+            </div>
+            
+            <div class="form-section">
+                <h3>Add New Command</h3>
+                <form class="settings-form" id="addCommandForm">
+                    <div class="form-group">
+                        <label for="commandName">Command Name</label>
+                        <input type="text" id="commandName" name="name" 
+                               placeholder="mycommand" required>
+                        <small>Command trigger (without prefix)</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="commandResponse">Response</label>
+                        <textarea id="commandResponse" name="response" rows="4" 
+                                  placeholder="This is my custom response!" required></textarea>
+                        <small>The message the bot will send when the command is used</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="toggle-label">
+                            <input type="checkbox" name="embed">
+                            <span class="toggle-slider"></span>
+                            Send as Embed
+                        </label>
+                        <small>Format the response as a fancy embed message</small>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Add Command</button>
+                </form>
+            </div>
+            
+            <div class="form-section">
+                <h3>Current Custom Commands</h3>
+                <% if (guild.customCommands.length > 0) { %>
+                    <div class="commands-list">
+                        <% guild.customCommands.forEach((cmd, index) => { %>
+                            <div class="command-item">
+                                <div class="command-header">
+                                    <h4><%= guild.prefix %><%= cmd.name %></h4>
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="deleteCommand(<%= index %>)">Delete</button>
+                                </div>
+                                <p class="command-response"><%= cmd.response %></p>
+                                <% if (cmd.embed) { %>
+                                    <span class="badge badge-info">Embed</span>
+                                <% } %>
+                            </div>
+                        <% }); %>
+                    </div>
+                <% } else { %>
+                    <p class="empty-state-text">No custom commands configured yet.</p>
+                <% } %>
+            </div>
+        </main>
+    </div>
+    
+    <%- include('../partials/footer') %>
+    
+    <script>
+        document.getElementById('addCommandForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const newCommand = {
+                name: formData.get('name'),
+                response: formData.get('response'),
+                embed: formData.get('embed') === 'on'
+            };
+            
+            try {
+                // Fetch current guild data
+                const guildResponse = await fetch(`/api/guild/<%= guild.guildId %>`);
+                const guildData = await guildResponse.json();
+                
+                // Add new command
+                if (!guildData.customCommands) {
+                    guildData.customCommands = [];
+                }
+                guildData.customCommands.push(newCommand);
+                
+                // Save
+                const response = await fetch(`/api/guild/<%= guild.guildId %>`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ customCommands: guildData.customCommands })
+                });
+                
+                if (response.ok) {
+                    alert('Command added successfully!');
+                    location.reload();
+                } else {
+                    alert('Failed to add command. Please try again.');
+                }
+            } catch (error) {
+                alert('An error occurred. Please try again.');
+            }
+        });
+        
+        async function deleteCommand(index) {
+            if (!confirm('Are you sure you want to delete this command?')) {
+                return;
+            }
+            
+            try {
+                // Fetch current guild data
+                const guildResponse = await fetch(`/api/guild/<%= guild.guildId %>`);
+                const guildData = await guildResponse.json();
+                
+                // Remove command
+                guildData.customCommands.splice(index, 1);
+                
+                // Save
+                const response = await fetch(`/api/guild/<%= guild.guildId %>`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ customCommands: guildData.customCommands })
+                });
+                
+                if (response.ok) {
+                    alert('Command deleted successfully!');
+                    location.reload();
+                } else {
+                    alert('Failed to delete command. Please try again.');
+                }
+            } catch (error) {
+                alert('An error occurred. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>

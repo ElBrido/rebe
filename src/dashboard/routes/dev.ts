@@ -5,7 +5,26 @@ import User from '../../database/models/User';
 
 const router = express.Router();
 
-// Developer authentication middleware
+// Check if user is a developer (for web UI)
+function isDeveloper(req: express.Request, res: express.Response, next: express.NextFunction) {
+  if (!req.isAuthenticated()) {
+    return res.redirect('/auth/discord');
+  }
+  
+  const user: any = req.user;
+  const developerIds = JSON.parse(process.env.DEVELOPER_IDS || '[]');
+  
+  if (developerIds.includes(user.id)) {
+    return next();
+  }
+  
+  res.status(403).render('error', { 
+    error: { message: 'Access denied. Developer privileges required.' },
+    user: req.user 
+  });
+}
+
+// Developer authentication middleware (for API)
 function isDevAuthenticated(req: express.Request, res: express.Response, next: express.NextFunction) {
   const token = req.headers.authorization?.split(' ')[1];
   
@@ -21,6 +40,61 @@ function isDevAuthenticated(req: express.Request, res: express.Response, next: e
     res.status(401).json({ error: 'Invalid token' });
   }
 }
+
+// Developer panel UI
+router.get('/', isDeveloper, async (req, res) => {
+  try {
+    const totalGuilds = await Guild.countDocuments();
+    const premiumGuilds = await Guild.countDocuments({ 'premium.enabled': true });
+    const totalUsers = await User.countDocuments();
+    
+    const topGuilds = await Guild.find()
+      .sort({ 'stats.commandsUsed': -1 })
+      .limit(10)
+      .select('guildId guildName stats premium');
+
+    res.render('dev/panel', { 
+      user: req.user,
+      stats: {
+        totalGuilds,
+        premiumGuilds,
+        totalUsers,
+        topGuilds
+      }
+    });
+  } catch (error) {
+    res.status(500).render('error', { error, user: req.user });
+  }
+});
+
+// Developer guilds management page
+router.get('/guilds', isDeveloper, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = 20;
+    const skip = (page - 1) * limit;
+
+    const guilds = await Guild.find()
+      .sort({ 'stats.commandsUsed': -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Guild.countDocuments();
+
+    res.render('dev/guilds', { 
+      user: req.user,
+      guilds,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    res.status(500).render('error', { error, user: req.user });
+  }
+});
 
 // Developer login
 router.post('/login', async (req, res) => {

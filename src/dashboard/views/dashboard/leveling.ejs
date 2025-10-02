@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leveling - <%= guild.guildName %></title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+    <%- include('../partials/header') %>
+    
+    <div class="dashboard-container">
+        <aside class="dashboard-sidebar">
+            <h2><%= guild.guildName %></h2>
+            <nav class="dashboard-nav">
+                <a href="/dashboard/<%= guild.guildId %>">Overview</a>
+                <a href="/dashboard/<%= guild.guildId %>/moderation">🛡️ Moderation</a>
+                <a href="/dashboard/<%= guild.guildId %>/antiraid">🔒 Anti-Raid</a>
+                <a href="/dashboard/<%= guild.guildId %>/welcome">👋 Welcome/Goodbye</a>
+                <a href="/dashboard/<%= guild.guildId %>/autoroles">🎭 Auto Roles</a>
+                <a href="/dashboard/<%= guild.guildId %>/leveling" class="active">📊 Leveling</a>
+                <a href="/dashboard/<%= guild.guildId %>/music">🎵 Music</a>
+                <a href="/dashboard/<%= guild.guildId %>/tickets">🎫 Tickets</a>
+                <a href="/dashboard/<%= guild.guildId %>/custom-commands">⚙️ Custom Commands</a>
+                <% if (guild.premium.enabled) { %>
+                    <a href="/dashboard/<%= guild.guildId %>/premium" class="premium-link">⭐ Premium</a>
+                <% } %>
+            </nav>
+        </aside>
+        
+        <main class="dashboard-main">
+            <div class="dashboard-header">
+                <h1>📊 Leveling System</h1>
+            </div>
+            
+            <form class="settings-form" id="levelingForm">
+                <div class="form-section">
+                    <h3>General Settings</h3>
+                    
+                    <div class="form-group">
+                        <label class="toggle-label">
+                            <input type="checkbox" name="leveling.enabled" <%= guild.leveling.enabled ? 'checked' : '' %>>
+                            <span class="toggle-slider"></span>
+                            Enable Leveling System
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="levelChannel">Level-Up Announcement Channel ID</label>
+                        <input type="text" id="levelChannel" name="leveling.channel" 
+                               value="<%= guild.leveling.channel || '' %>" 
+                               placeholder="Enter channel ID (leave empty for current channel)">
+                        <small>Channel where level-up messages will be sent</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="xpMultiplier">XP Multiplier</label>
+                        <input type="number" id="xpMultiplier" name="leveling.xpMultiplier" 
+                               value="<%= guild.leveling.xpMultiplier %>" min="0.1" max="10" step="0.1">
+                        <small>Multiplier for XP gain (default: 1.0)</small>
+                    </div>
+                </div>
+                
+                <div class="info-section">
+                    <h3>How It Works</h3>
+                    <ul>
+                        <li>Members gain XP by sending messages (1-5 XP per message)</li>
+                        <li>XP cooldown: 60 seconds between messages</li>
+                        <li>Level up formula: Level = √(XP / 100)</li>
+                        <li>Use <code>/rank</code> to check your level</li>
+                        <li>Use <code>/leaderboard</code> to see top members</li>
+                    </ul>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="reset" class="btn btn-secondary">Reset</button>
+                </div>
+            </form>
+        </main>
+    </div>
+    
+    <%- include('../partials/footer') %>
+    
+    <script>
+        document.getElementById('levelingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = {};
+            
+            // Process form data
+            for (let [key, value] of formData.entries()) {
+                if (key.includes('.')) {
+                    const keys = key.split('.');
+                    let obj = data;
+                    for (let i = 0; i < keys.length - 1; i++) {
+                        if (!obj[keys[i]]) obj[keys[i]] = {};
+                        obj = obj[keys[i]];
+                    }
+                    
+                    // Convert numbers
+                    if (key.includes('xpMultiplier')) {
+                        obj[keys[keys.length - 1]] = parseFloat(value);
+                    } else {
+                        obj[keys[keys.length - 1]] = value;
+                    }
+                } else {
+                    data[key] = value;
+                }
+            }
+            
+            // Handle checkboxes
+            const checkboxes = e.target.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                const keys = cb.name.split('.');
+                let obj = data;
+                for (let i = 0; i < keys.length - 1; i++) {
+                    if (!obj[keys[i]]) obj[keys[i]] = {};
+                    obj = obj[keys[i]];
+                }
+                obj[keys[keys.length - 1]] = cb.checked;
+            });
+            
+            try {
+                const response = await fetch(`/api/guild/<%= guild.guildId %>`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    alert('Settings saved successfully!');
+                    location.reload();
+                } else {
+                    alert('Failed to save settings. Please try again.');
+                }
+            } catch (error) {
+                alert('An error occurred. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>
