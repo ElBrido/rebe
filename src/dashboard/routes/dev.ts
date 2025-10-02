@@ -1,5 +1,5 @@
 import express from 'express';
-const jwt = require('jsonwebtoken');
+import jwt from 'jsonwebtoken';
 import Guild from '../../database/models/Guild';
 import User from '../../database/models/User';
 
